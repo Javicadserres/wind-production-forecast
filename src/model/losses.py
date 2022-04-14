@@ -50,7 +50,7 @@ class SmoothPinballLoss(nn.Module):
         Target to predict.
     self.quantiles : torch.tensor
     """
-    def __init__(self, quantiles, alpha=0.01):
+    def __init__(self, quantiles, alpha=0.001):
         super(SmoothPinballLoss,self).__init__()
         self.pred = None
         self.targes = None
