@@ -21,7 +21,14 @@ class Trainer(object):
         self.criterion = criterion
         self.optimizer = optimizer
         
-    def fit(self, train_loader, val_loader, epochs, patience=100):
+    def fit(
+            self, 
+            train_loader, 
+            val_loader, 
+            epochs=1000, 
+            n_logger=100, 
+            patience=100
+        ):
         """Fit the model.
         
         Parameters
@@ -29,6 +36,9 @@ class Trainer(object):
         train_loader: torch.DataLoader
         val_loader: torch.DataLoader
         epochs: int
+        n_logger: int
+            Number of epochs until it prints the updated
+            results.
         patience: int
         
         Returns
@@ -36,7 +46,7 @@ class Trainer(object):
         model: torch.Module
         """ 
         self._initialize_variables(
-                train_loader, val_loader, epochs, patience
+                train_loader, val_loader, epochs, n_logger, patience
         )
         while self.epoch < epochs and not self.stop: 
             # training
@@ -57,7 +67,7 @@ class Trainer(object):
         return self.model
 
     def _initialize_variables(
-            self, train_loader, val_loader, epochs, patience
+            self, train_loader, val_loader, epochs, n_logger, patience
         ):
         """
         Initialize the variables for the training processes.
@@ -72,6 +82,7 @@ class Trainer(object):
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.epochs = epochs
+        self.n_logger = n_logger
 
     def forward_train(self):
         """
@@ -121,8 +132,9 @@ class Trainer(object):
         epoch_info = f'epoch: {self.epoch} '
         train_info = f'train loss: {round(self.train_losses[-1], 3)} '
         val_info = f'val loss: {round(self.val_losses[-1], 3)}'
-
-        print(epoch_info + train_info + val_info)
+        
+        if self.epoch % self.n_logger == 0:
+            print(epoch_info + train_info + val_info)
 
     def earlystopping(self):
         """
