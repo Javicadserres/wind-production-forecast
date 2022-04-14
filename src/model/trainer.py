@@ -80,7 +80,7 @@ class Trainer(object):
         self.model.train()
         train_loss = 0
 
-        for num, data in enumerate(self.train_loader, 0):
+        for num, data in enumerate(self.train_loader):
             inputs, target = data
             
             # Zero the gradients
