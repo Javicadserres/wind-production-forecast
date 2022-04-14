@@ -8,8 +8,8 @@ class Dataset(torch.utils.data.Dataset):
 
     Parameters
     ----------
-    input: torch.tensor
-    target: torch.tensor
+    input: list or numpy.array
+    target: list or numpy.array
     """
     def __init__(self, inputs, target):
         self.inputs = torch.tensor(inputs, dtype=torch.float32)
@@ -19,4 +19,4 @@ class Dataset(torch.utils.data.Dataset):
         return len(self.target)
 
     def __getitem__(self,idx):
-        return self.inputs[idx],self.target[idx]
+        return self.inputs[idx], self.target[idx]

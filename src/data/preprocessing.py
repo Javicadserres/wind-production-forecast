@@ -13,10 +13,22 @@ class FrameTorch(object):
     ----------
     data: pandas.DataFrame
         DataFrame containing the inputs and the label
-        to be used in the model. Note: The label needs 
-        to be in the last column.
+        to be used in the model. 
+    target_name: str
+        Name of the target in the dataframe.
+
+    Attributes
+    ----------
+    data_train: torch.tensor
+    data_val: torch.tensor
+    data_test: torch.tensor
+
     """
-    def __init__(self, data):
+    def __init__(self, data, target_name='production'):
+        # move target to the end
+        _target = data.pop(target_name)
+        data[target_name] = _target
+
         self.data = torch.tensor(data.values, dtype=torch.float32)
         self.n = len(data)
     
@@ -54,29 +66,66 @@ class FrameTorch(object):
         self.data_train = self.scaler.transform(self.data_train)
         self.data_val = self.scaler.transform(self.data_val)   
         self.data_test = self.scaler.transform(self.data_test)
-        
-    def data_to_loader(self, batch_size=64):
+    
+    def data_to_loader(self, batch_size=64, slide=None):
         """
         Converts data to DataLoader pytorch module.
         
         Parameters
         ----------
         batch_size: int
+        slide: int, default=None
+            This parameter is used for recurrent networks
+            and set the number of windows you want to look
+            back.
         """
         # train, val and test
-        train_loader = self._get_loader(self.data_train)
-        val_loader = self._get_loader(self.data_val)
-        test_loader = self._get_loader(self.data_test)
+        train_loader = self._get_loader(self.data_train, slide)
+        val_loader = self._get_loader(self.data_val, slide)
+        test_loader = self._get_loader(self.data_test, slide)
         
         return train_loader, val_loader, test_loader
+
+    @staticmethod
+    def slide_data(inputs, outputs, slide):
+        """
+        Slide data for recurrent networks.
+
+        Parameters
+        ----------
+        inputs: torch.tensor, numpy.array or list
+        slide: int
+            This parameter is used for recurrent networks
+            and set the number of windows you want to look
+            back.
+
+        Returns
+        -------
+        slide_inputs: list
+        outputs: list
+            Corrected outputs
+        """
+        slide_inputs = []
+        steps = range(inputs.shape[0] - slide)
+
+        for step in steps:
+            slide_input = inputs[step : step+slide]
+            slide_inputs.append(slide_input.tolist())
         
-    def _get_loader(self, data):
+        outputs = outputs[slide:].tolist()
+
+        return slide_inputs, outputs
+
+    def _get_loader(self, data, slide=None):
         """
         Get loader.
         """
         # inputs and target
         inputs = data[:, :-1]
         target = data[:, -1:]
+
+        if slide is not None:
+            inputs, target = self.slide_data(inputs, target, slide)
         
         # loader
         dataset = Dataset(inputs, target)
