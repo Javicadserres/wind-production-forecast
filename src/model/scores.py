@@ -221,6 +221,6 @@ class IntervalScorePaper(AverageCoverageError):
         spread_high = self.target - self.pred_high
         
         scale = 2 / (1 - self.pinc)
-        penalize = scale * torch.max(spread_low, spread_high).clip(1)
+        penalize = scale * torch.max(spread_low, spread_high).clip(0)
         
         return penalize
