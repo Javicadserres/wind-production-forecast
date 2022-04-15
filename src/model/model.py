@@ -88,3 +88,33 @@ class LSTM(nn.Module):
         out = self.lin(out)
 
         return out[:, -1, :]
+
+class AttentionLSTM(nn.Module):
+    """
+    LSTM using a multihead attention mechanism.
+
+    Parameters
+    ----------
+    embed_dim: int
+    out_size: int
+    hidden_size: int, default=20    
+    n_layers: int, default=2
+    """
+    def __init__(self, embed_dim, out_size, hidden_size=20, n_layers=2):
+        super(AttentionLSTM, self).__init__()
+        self.att = nn.MultiheadAttention(
+            embed_dim=embed_dim,
+            num_heads=embed_dim
+        )
+        self.lstm = nn.LSTM(
+            input_size=embed_dim,
+            hidden_size=hidden_size,
+            num_layers=n_layers
+        )
+        self.lin = nn.Linear(hidden_size, out_size)
+
+    def forward(self, X):
+        out, weights = self.att(X, X, X)
+        out, (h, c) = self.lstm(out)
+        out = self.lin(out)
+        return out[:, -1, :]
