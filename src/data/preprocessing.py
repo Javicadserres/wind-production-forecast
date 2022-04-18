@@ -80,9 +80,9 @@ class FrameTorch(object):
             back.
         """
         # train, val and test
-        train_loader = self._get_loader(self.data_train, slide)
-        val_loader = self._get_loader(self.data_val, slide)
-        test_loader = self._get_loader(self.data_test, slide)
+        train_loader = self._get_loader(self.data_train, slide, batch_size)
+        val_loader = self._get_loader(self.data_val, slide, batch_size)
+        test_loader = self._get_loader(self.data_test, slide, batch_size)
         
         return train_loader, val_loader, test_loader
 
@@ -106,17 +106,16 @@ class FrameTorch(object):
             Corrected outputs
         """
         slide_inputs = []
-        steps = range(inputs.shape[0] - slide)
+        steps = range(inputs.shape[0] - slide + 1)
 
         for step in steps:
             slide_input = inputs[step : step+slide]
             slide_inputs.append(slide_input.tolist())
         
-        outputs = outputs[slide:].tolist()
-
+        outputs = outputs[slide-1:].tolist()
         return slide_inputs, outputs
 
-    def _get_loader(self, data, slide=None):
+    def _get_loader(self, data, slide=None, batch_size=64):
         """
         Get loader.
         """
@@ -129,6 +128,6 @@ class FrameTorch(object):
         
         # loader
         dataset = Dataset(inputs, target)
-        loader = DataLoader(dataset=dataset, batch_size=64)
+        loader = DataLoader(dataset=dataset, batch_size=batch_size)
         
         return loader
