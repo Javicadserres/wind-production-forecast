@@ -85,9 +85,10 @@ class LSTM(nn.Module):
         x: torch.tensor
         """
         out, (h, c) = self.lstm(x)
+        out = out[:, -1, :]
         out = self.lin(out)
 
-        return out[:, -1, :]
+        return out
 
 class AttentionLSTM(nn.Module):
     """
@@ -116,5 +117,6 @@ class AttentionLSTM(nn.Module):
     def forward(self, X):
         out, weights = self.att(X, X, X)
         out, (h, c) = self.lstm(out)
+        out = out[:, -1, :]
         out = self.lin(out)
-        return out[:, -1, :]
+        return out
