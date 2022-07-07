@@ -1,4 +1,5 @@
 import torch
+import copy
 
 
 class Trainer(object):
@@ -20,6 +21,7 @@ class Trainer(object):
         self.model = model
         self.criterion = criterion
         self.optimizer = optimizer
+        self.best_model = None
         
     def fit(
             self, 
@@ -142,6 +144,10 @@ class Trainer(object):
         """
         # check actual loss
         if self.val_losses[-1] >= self.last_loss: self.trigger += 1
+        # get best model
+        if self.val_losses[-1] <= min(self.val_losses): 
+            self.best_model = copy.copy(self.model)
+ 
         self.last_loss = self.val_losses[-1]
         
         # condition for stopping
